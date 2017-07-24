@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css"/>
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap-theme.min.css"/>
+  
+    <title>Actas beta</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    
+   <style type="text/css">
+   
+   .node circle {
+  fill: #fff;
+  stroke: black;
+  stroke-width: 1px;
+}
+
+.node circle.externalContract {
+ 
+  stroke: blue;
+  stroke-width: 8px;
+}
+
+
+.node text { font: 12px sans-serif; }
+
+.node--internal text {
+  text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+}
+
+.link {
+  fill: none;
+stroke: #ccc;
+  stroke-width: 2px;
+}
+
+.iframeHidden{
+width: 0px;
+ height: 0px;
+ overflow: hidden;
+}
+
+#formControlsTextarea{
+
+ height: 350px;
+ resize: none;
+}
+
+
+   </style> 
+</head>
+<body>
+	<script id="exampleSolc" type = "text/template">
+contract owned {
+  function owned() { owner = msg.sender; }
+  address owner;
+
+  // This contract only defines a modifier but does not use it - it will
+  // be used in derived contracts.
+  // The function body is inserted where the special symbol "_" in the
+  // definition of a modifier appears.
+  modifier onlyowner { if (msg.sender == owner) _; }
+}
+contract mortal is owned {
+  // This contract inherits the "onlyowner"-modifier from "owned" and
+  // applies it to the "kill"-function, which causes that calls to "kill"
+  // only have an effect if they are made by the stored owner.
+  function kill() onlyowner {
+    suicide(owner);
+  }
+}
+contract priced {
+  // Modifiers can receive arguments:
+  modifier costs(uint price) { if (msg.value >= price) _; }
+}
+contract Register is priced, owned {
+  mapping (address => bool) registeredAddresses;
+  uint price;
+  function Register(uint initialPrice) { price = initialPrice; }
+  function register() costs(price) {
+    registeredAddresses[msg.sender] = true;
+  }
+  function changePrice(uint _price) onlyowner {
+    price = _price;
+  }
+}
+	</script>
+	<h2>Atcas Beta</h2>
+	
+	<div>
+	<h3>Info</h3>
+	<p>Constract -> blue</p>
+	<p>Contract's Variable -> yellow</p>
+	<p>Contract's Function -> green</p>
+	<p>Contract's Modifier -> Red</p>
+	<p>Contract's Event -> Pink</p>
+	<p>[*]-> Number times called</p>
+	</div>
+	
+    <div id="container"></div>
+    <script src="/javascripts/app.js"></script>
+    <div id="sandbox"></div>
+</body>
+</html>
